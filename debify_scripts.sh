@@ -128,7 +128,6 @@ function notify_without_waiting(){
   local __msg=$1
   notify_user "$__msg"
 }
-
 #############################################################################
 ## run
 #############################################################################
@@ -194,7 +193,39 @@ Description: $package_description'\
 # setup script to run after dpkg using /tmp as its root directory
 sh -c "echo '\
 #!/bin/bash
-bash -c \"/tmp/$input_repo/$input_file\"'\
+# check if system installed given package
+# format: is_installed PACKAGE
+function is_installed(){
+  local __package=\"\$1\"
+  for __package; do
+      dpkg -s \"\$__package\" >/dev/null 2>&1 && {
+          return 0
+      } || {
+          return
+      }
+  done
+}
+
+# notify the user
+function notify_user(){
+  local __msg=\$1
+
+  if is_installed zenity; then
+    nohup zenity --info --text \"\$__msg\" >/dev/null 2>&1 &
+  else
+    echo -e \"\$__msg\"
+  fi
+}
+
+chmod a+x \"/tmp/$input_repo/$input_file\"
+__msg_user=\"\\\n\\\n-----------------------------------------------------------------\\\n\"
+__msg_user=\"\${__msg_user}Queued package '\''$input_repo'\'' for installation:\\\n\"
+__msg_user=\"\${__msg_user}     - It is now \`date\`\\\n\"
+__msg_prog=\$(echo \"nohup bash -c /tmp/$input_repo/$input_file 1> /tmp/$input_repo/install.log 2>&1\" | at now + 1 min  2>&1 | tail -n 1)
+__msg_user=\"\${__msg_user}     - Queued \${__msg_prog}\\\n\"
+__msg_user=\"\${__msg_user}     - Installation log set to /tmp/$input_repo/install.log\\\n\"
+__msg_user=\"\${__msg_user}-----------------------------------------------------------------\"
+notify_user \"\$__msg_user\"'\
 > $dir_output_iteration/DEBIAN/postinst"
 chmod 0755 "$dir_output_iteration/DEBIAN/postinst"
 sed --in-place "s/DIR_SCRIPT_ROOT\=.*$/DIR_SCRIPT_ROOT=\"\/tmp\/$input_repo\"/g" "$dir_output_iteration/DEBIAN/postinst"
