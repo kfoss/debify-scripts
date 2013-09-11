@@ -71,32 +71,57 @@ function find_max_version(){
 # notify the user
 function notify_user(){
   local __msg=$1
+
   if is_installed zenity; then
-    zenity --info --text "$__msg"
+    zenity --info --text "$__msg" &
   else
     echo "$__msg"
   fi
 }
 
+# ask the user a question
+function ask_user(){
+  local __msg=$1
+    if [ $install_messages_command_line_only == false ] && is_installed zenity; then
+    zenity --question --text "$__msg"
+  else
+    # read in variable with default value
+    echo -e "$__msg [Yn]"
+    read __confirm
+    [ -z "$__confirm" ] && __confirm="Y"
+
+    if [ "$__confirm" == "Y" ]; then
+      return 0
+    elif [ "$__confirm" == "n" ]; then
+      return 1
+    else
+      ask_user $__msg
+    fi
+  fi
+}
 
 # notify and wait for user confirmation before continuing
 function notify_and_wait(){
   local __msg=$1
   notify_user "$__msg"
-  if is_installed zenity; then
-    if [ "0" -ne "$?" ]; then
-      sleep 3
-      notify_and_wait $__msg
-    fi
-  else
-    echo "Ready to continue? (Y/n)"
-    read __confirm
-    if [ "$__confirm" == "n" ]; then
-      notify_and_wait $__msg
-    fi
+
+  ask_user "Ready to continue?"
+  if [ "0" -ne "$?" ]; then
+    notify_and_wait $__msg
   fi
 }
 
+# notify and wait for user confirmation before continuing
+function ask_to_proceed(){
+  local __msg=$1
+  ask_user $__msg
+
+  if [ "0" -eq "$?" ]; then
+    return 0
+  else
+    return
+  fi
+}
 
 # notify and continue without waiting for user confirmation
 function notify_without_waiting(){
@@ -183,9 +208,4 @@ cp "$dir_output/${input_repo}_${package_version}-${package_iteration}.deb" "$dir
 
 # cleanup and alert complete
 rm --recursive "$dir_output/${input_repo}_${package_version}-${package_iteration}"
-notify_and_wait "Package $input_repo (${input_repo}_${package_version}-${package_iteration}) Built"
-
-
-
-
-
+notify_without_waiting "Package $input_repo (${input_repo}_${package_version}-${package_iteration}) Built"
