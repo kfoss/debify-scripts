@@ -184,7 +184,7 @@ Version: ${package_version}-${package_iteration}
 Section: base
 Priority: optional
 Architecture: $package_architecture
-Depends: realpath
+Depends: realpath,at
 Maintainer: $package_author_name <$package_author_email>
 Description: $package_description'\
 > $dir_output_iteration/DEBIAN/control"
