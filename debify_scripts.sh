@@ -202,7 +202,7 @@ function is_installed(){
       dpkg -s \"\$__package\" >/dev/null 2>&1 && {
           return 0
       } || {
-          return
+          return 1
       }
   done
 }
