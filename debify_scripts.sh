@@ -219,6 +219,19 @@ function notify_user(){
 }
 
 chmod a+x \"/tmp/$input_repo/$filename\"
+
+## add functions to display notification message
+echo \"\n\n### cleanup functions added by debify-scripts ###\" >> \"/tmp/$input_repo/$filename\"
+echo \"export DISPLAY=:0\" >> \"/tmp/$input_repo/$filename\"
+echo \"function \$(declare -f is_installed)\" >> \"/tmp/$input_repo/$filename\"
+echo \"function \$(declare -f notify_user)\" >> \"/tmp/$input_repo/$filename\"
+
+## add notification message
+echo \"notify_user \\\"Finished installing $input_repo \\ \" >> \"/tmp/$input_repo/$filename\"
+echo \"\n### BEGIN /tmp/$input_repo/install.log ### \\ \" >> \"/tmp/$input_repo/$filename\"
+echo \"\\\$(cat /tmp/$input_repo/install.log) \\ \" >> \"/tmp/$input_repo/$filename\"
+echo \"## END /tmp/$input_repo/install.log ###\\\" \" >> \"/tmp/$input_repo/$filename\"
+
 __msg_user=\"\\\n\\\n-----------------------------------------------------------------\\\n\"
 __msg_user=\"\${__msg_user}Queued package '\''$input_repo'\'' for installation:\\\n\"
 __msg_user=\"\${__msg_user}     - It is now \`date\`\\\n\"
