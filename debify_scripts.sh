@@ -157,16 +157,13 @@ fi
 input_dir=$(dirname $(realpath $input_file))
 input_repo=$(basename $input_dir)
 dir_output="$input_dir/deb"
-variable_get_or_set package_description "${input_repo}_${package_version}" "$package_description"
-
 
 # create output dir
 mkdir --parents $dir_output
 
-
-# calculate the new iteration
+# calculate the iteration and description
 find_max_version package_iteration "$dir_output/${input_repo}_${package_version}"
-
+variable_get_or_set package_description "${input_repo}_${package_version}-${package_iteration}" "$package_description"
 
 # create a directory shell for the new iteration
 dir_output_iteration="$dir_output/${input_repo}_${package_version}-${package_iteration}"
