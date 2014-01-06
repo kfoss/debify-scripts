@@ -149,6 +149,7 @@ shift $(($OPTIND - 1))
 
 # configure input/ouput dirs
 input_file=$1
+filename=$(basename $input_file)
 if [ -z "$input_file" ]; then
   notify_without_waiting $msg_usage
   exit
@@ -217,11 +218,11 @@ function notify_user(){
   fi
 }
 
-chmod a+x \"/tmp/$input_repo/$input_file\"
+chmod a+x \"/tmp/$input_repo/$filename\"
 __msg_user=\"\\\n\\\n-----------------------------------------------------------------\\\n\"
 __msg_user=\"\${__msg_user}Queued package '\''$input_repo'\'' for installation:\\\n\"
 __msg_user=\"\${__msg_user}     - It is now \`date\`\\\n\"
-__msg_prog=\$(echo \"nohup bash -c /tmp/$input_repo/$input_file 1> /tmp/$input_repo/install.log 2>&1\" | at now + 1 min  2>&1 | tail -n 1)
+__msg_prog=\$(echo \"nohup bash -c /tmp/$input_repo/$filename 1> /tmp/$input_repo/install.log 2>&1\" | at now + 1 min  2>&1 | tail -n 1)
 __msg_user=\"\${__msg_user}     - Queued \${__msg_prog}\\\n\"
 __msg_user=\"\${__msg_user}     - Installation log set to /tmp/$input_repo/install.log\\\n\"
 __msg_user=\"\${__msg_user}-----------------------------------------------------------------\"
